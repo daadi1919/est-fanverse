@@ -94,3 +94,4 @@ Code open-source pour usage communautaire. Toute exploitation commerciale requie
 **Vive l’Espérance !**
 # EST FanVerse
 Voir README complet dans le projet.
+# est-fanverse
