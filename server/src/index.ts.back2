@@ -1,0 +1,40 @@
+import express from "express";
+import cors from "cors";
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+import logsRouter from "./routes/logs";
+import nftRouter from "./routes/nfts"; // ✅ Nouvelle route
+
+dotenv.config();
+
+const app = express();
+const PORT = process.env.PORT || 4000;
+const MONGO_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/fanverse";
+
+// ✅ Middleware
+app.use(cors({ origin: "http://localhost:3004" }));
+app.use(express.json());
+
+// ✅ Connexion MongoDB
+mongoose.connect(MONGO_URI)
+  .then(() => {
+    console.log("✅ Connecté à MongoDB");
+  })
+  .catch((err) => {
+    console.error("❌ Erreur de connexion MongoDB :", err);
+    process.exit(1);
+  });
+
+// ✅ Routes
+app.use("/api/logs", logsRouter);
+app.use("/api/nfts", nftRouter); // 📦 Liste des NFTs mintés pour une adresse
+
+// ✅ Route par défaut
+app.get("/", (req, res) => {
+  res.send("🚀 API EST FanVerse est opérationnelle !");
+});
+
+// ✅ Lancement serveur
+app.listen(PORT, () => {
+  console.log(`🟢 Backend disponible sur http://localhost:${PORT}`);
+});

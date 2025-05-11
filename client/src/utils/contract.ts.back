@@ -1,0 +1,21 @@
+import { ethers } from "ethers";
+
+// Adresse de ton contrat FanToken (exemple, à remplacer par la tienne)
+export const fanTokenAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+
+export const fanTokenAbi = [
+  "function balanceOf(address owner) view returns (uint256)",
+  "function symbol() view returns (string)"
+];
+
+export const getTokenBalance = async (account: string) => {
+  if (!window.ethereum) return null;
+
+  const provider = new ethers.BrowserProvider(window.ethereum);
+  const signer = await provider.getSigner();
+  const contract = new ethers.Contract(fanTokenAddress, fanTokenAbi, signer);
+  
+  const balance = await contract.balanceOf(account);
+  const symbol = await contract.symbol();
+  return { balance: ethers.formatUnits(balance, 18), symbol };
+};

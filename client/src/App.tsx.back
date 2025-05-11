@@ -1,0 +1,41 @@
+import React, { useState } from 'react';
+import { getTokenBalance } from './utils/contract';
+
+function App() {
+  const [account, setAccount] = useState<string | null>(null);
+  const [balance, setBalance] = useState<string | null>(null);
+  const [symbol, setSymbol] = useState<string>("");
+
+  const connectWallet = async () => {
+    if (window.ethereum) {
+      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+      const selected = accounts[0];
+      setAccount(selected);
+      const data = await getTokenBalance(selected);
+      if (data) {
+        setBalance(data.balance);
+        setSymbol(data.symbol);
+      }
+    } else {
+      alert("MetaMask n'est pas installé !");
+    }
+  };
+
+  return (
+    <div className="p-4">
+      <h1>Bienvenue sur EST FanVerse 🦅</h1>
+      {account ? (
+        <div>
+          <p>Adresse : {account}</p>
+          <p>Solde : {balance} {symbol}</p>
+        </div>
+      ) : (
+        <button onClick={connectWallet} className="p-2 bg-red-700 text-white rounded">
+          Connecter MetaMask
+        </button>
+      )}
+    </div>
+  );
+}
+
+export default App;

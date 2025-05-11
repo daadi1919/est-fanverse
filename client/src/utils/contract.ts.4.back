@@ -1,0 +1,66 @@
+import { ethers } from "ethers";
+
+// Adresse des contrats (déployés en local avec Hardhat)
+export const fanTokenAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+export const fanNFTAddress = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
+
+// ABI du contrat FanToken (ERC20)
+export const fanTokenAbi = [
+  {
+    "inputs": [{ "internalType": "address", "name": "account", "type": "address" }],
+    "name": "balanceOf",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "symbol",
+    "outputs": [{ "internalType": "string", "name": "", "type": "string" }],
+    "stateMutability": "view",
+    "type": "function"
+  }
+];
+
+// ABI du contrat FanNFT (ERC721 avec mintNFT)
+export const fanNFTAbi = [
+  {
+    "inputs": [
+      { "internalType": "address", "name": "recipient", "type": "address" },
+      { "internalType": "string", "name": "tokenURI", "type": "string" }
+    ],
+    "name": "mintNFT",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+];
+
+// 🔁 Lire le solde de $TARAJI
+export const getTokenBalance = async (account: string) => {
+  if (!window.ethereum) return null;
+
+  const provider = new ethers.BrowserProvider(window.ethereum);
+  const signer = await provider.getSigner();
+  const contract = new ethers.Contract(fanTokenAddress, fanTokenAbi, signer);
+
+  const balance = await contract.balanceOf(account);
+  const symbol = await contract.symbol();
+  return {
+    balance: ethers.formatUnits(balance, 18),
+    symbol
+  };
+};
+
+// 🧪 Minter un NFT pour l'utilisateur connecté
+export const mintNFT = async (account: string, tokenURI: string) => {
+  if (!window.ethereum) return null;
+
+  const provider = new ethers.BrowserProvider(window.ethereum);
+  const signer = await provider.getSigner();
+  const contract = new ethers.Contract(fanNFTAddress, fanNFTAbi, signer);
+
+  const tx = await contract.mintNFT(account, tokenURI);
+  await tx.wait(); // Attendre que le mint soit miné
+  return tx;
+};

@@ -1,0 +1,32 @@
+const fs = require("fs");
+const hre = require("hardhat");
+
+async function main() {
+  const [deployer] = await hre.ethers.getSigners();
+  console.log("📦 Déploiement avec le compte :", deployer.address);
+
+  const FanToken = await hre.ethers.getContractFactory("FanToken");
+  const fanToken = await FanToken.deploy();
+  await fanToken.waitForDeployment();
+  const fanTokenAddress = await fanToken.getAddress();
+  console.log("✅ FanToken déployé à :", fanTokenAddress);
+
+  const FanNFT = await hre.ethers.getContractFactory("FanNFT");
+  const fanNFT = await FanNFT.deploy();
+  await fanNFT.waitForDeployment();
+  const fanNFTAddress = await fanNFT.getAddress();
+  console.log("✅ FanNFT déployé à :", fanNFTAddress);
+
+  // Enregistre les adresses pour le frontend
+  const output = {
+    fanTokenAddress,
+    fanNFTAddress
+  };
+  fs.writeFileSync("../client/src/contracts.json", JSON.stringify(output, null, 2));
+  console.log("📁 Adresses enregistrées dans client/src/contracts.json");
+}
+
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});

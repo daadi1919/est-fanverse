@@ -1,0 +1,37 @@
+import express from "express";
+import { ethers } from "ethers";
+import { fanNFTAddress, fanNFTAbi } from "../../../client/src/utils/contract"; // ✅ adapte si ton chemin est différent
+
+const router = express.Router();
+
+router.get("/:address", async (req, res) => {
+  try {
+    const address = req.params.address.toLowerCase();
+    console.log("🔍 Recherche des NFTs pour :", address);
+
+    const provider = new ethers.JsonRpcProvider("http://localhost:8545"); // Hardhat local
+    const contract = new ethers.Contract(fanNFTAddress, fanNFTAbi, provider);
+
+    const uris: string[] = [];
+
+    for (let i = 1; i <= 100; i++) {
+      try {
+        const owner = await contract.ownerOf(i);
+        if (owner.toLowerCase() === address) {
+          const uri = await contract.tokenURI(i);
+          uris.push(uri);
+        }
+      } catch (err) {
+        // Dès que ownerOf échoue, on suppose qu'on a dépassé les NFTs mintés
+        break;
+      }
+    }
+
+    res.json({ nfts: uris });
+  } catch (error) {
+    console.error("❌ Erreur récupération NFTs :", error);
+    res.status(500).json({ error: "Erreur récupération NFTs" });
+  }
+});
+
+export default router;

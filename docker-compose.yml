@@ -1,1 +1,30 @@
-# Docker config
+version: '3'
+services:
+  mongo:
+    image: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  backend:
+    build: ./server
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - MONGODB_URI=mongodb://mongo:27017/fanverse
+    depends_on:
+      - mongo
+
+  frontend:
+    build: ./client
+    ports:
+      - "3004:3004"
+    environment:
+      - PORT=3004
+    depends_on:
+      - backend
+
+volumes:
+  mongo_data:
